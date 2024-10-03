@@ -26,9 +26,7 @@ class ResultFragment : Fragment() {
         val result = ResultFragmentArgs.fromBundle(requireArguments()).result
         viewModelFactory = ResultViewModelFactory(result)
         viewModel = ViewModelProvider(this, viewModelFactory).get(ResultViewModel::class.java)
-
-        // Текстовое представление заполняется строкой, переданной из GameFragment.
-        binding.wonLost.text = viewModel.result
+        binding.resultViewModel = viewModel
 
         // По щелчку на кнопке происходит переход к GameFragment.
         binding.newGameButton.setOnClickListener {
