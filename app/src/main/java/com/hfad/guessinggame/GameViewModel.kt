@@ -30,6 +30,10 @@ class GameViewModel : ViewModel() {
     val livesLeft: LiveData<Int>
         get() = _livesLeft
 
+    private val _gameOver = MutableLiveData<Boolean>(false)
+    val gameOver: LiveData<Boolean>
+        get() = _gameOver
+
     init {
         // Этот метод вызывается в блоке init, который выполняется при инициализации класса.
         _secretWordDisplay.value = deriveSecretWordDisplay()
@@ -55,6 +59,7 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    // Вызывается, когда пользователь вводит предположение
     fun makeGuess(guess: String) {
         if (guess.length == 1) {
             if (secretWord.contains(guess)) {
@@ -64,14 +69,16 @@ class GameViewModel : ViewModel() {
                 _incorrectGuesses.value += "$guess "
                 _livesLeft.value = _livesLeft.value?.minus(1)
             }
+
+            if (isWon() || isLost()) _gameOver.value = true
         }
     }
 
     // Пользователь выиграл, если загаданное слово совпадает с secretWordDisplay
-    fun isWon() = secretWord.equals(_secretWordDisplay.value, true)
+    private fun isWon() = secretWord.equals(_secretWordDisplay.value, true)
 
     // Пользователь проиграл, если у него кончились жизни
-    fun isLost() = (_livesLeft.value ?: 0) <= 0
+    private fun isLost() = (_livesLeft.value ?: 0) <= 0
 
     // Возвращает строку, которая сообщает,
     // выиграл или проиграл пользователь и какое слово было загадано
