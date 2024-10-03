@@ -1,5 +1,6 @@
 package com.hfad.guessinggame
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class GameViewModel : ViewModel() {
@@ -7,15 +8,24 @@ class GameViewModel : ViewModel() {
     // быть более длинным, чтобы игра не была слишком простой
     val words = listOf("Android", "Activity", "Fragment")
 
-    val secretWord = words.random().uppercase()     // Слово, которое нужно угадать
-    var secretWordDisplay = ""                      // Вид, в котором слово отображается на экране
-    var correctGuesses = ""                         // Количество правильных предположений
-    var incorrectGuesses = ""                       // Количество неправильных предположений
-    var livesLeft = 8                               // Количество оставшихся жизней
+    // Слово, которое нужно угадать
+    val secretWord = words.random().uppercase()
+
+    // Вид, в котором слово отображается на экране
+    val secretWordDisplay = MutableLiveData<String>()
+
+    // Количество правильных предположений
+    var correctGuesses = ""
+
+    // Количество неправильных предположений
+    val incorrectGuesses = MutableLiveData<String>("")
+
+    // Количество оставшихся жизней
+    val livesLeft = MutableLiveData<Int>(8)
 
     init {
         // Этот метод вызывается в блоке init, который выполняется при инициализации класса.
-        secretWordDisplay = deriveSecretWordDisplay()
+        secretWordDisplay.value = deriveSecretWordDisplay()
     }
 
     // Здесь создается строка с формой, в которой загаданное слово должно отображаться на экране
@@ -42,19 +52,19 @@ class GameViewModel : ViewModel() {
         if (guess.length == 1) {
             if (secretWord.contains(guess)) {
                 correctGuesses += guess
-                secretWordDisplay = deriveSecretWordDisplay()
+                secretWordDisplay.value = deriveSecretWordDisplay()
             } else {
-                incorrectGuesses += "$guess "
-                livesLeft--
+                incorrectGuesses.value += "$guess "
+                livesLeft.value = livesLeft.value?.minus(1)
             }
         }
     }
 
     // Пользователь выиграл, если загаданное слово совпадает с secretWordDisplay
-    fun isWon() = secretWord.equals(secretWordDisplay, true)
+    fun isWon() = secretWord.equals(secretWordDisplay.value, true)
 
     // Пользователь проиграл, если у него кончились жизни
-    fun isLost() = livesLeft <= 0
+    fun isLost() = (livesLeft.value ?: 0) <= 0
 
     // Возвращает строку, которая сообщает,
     // выиграл или проиграл пользователь и какое слово было загадано
