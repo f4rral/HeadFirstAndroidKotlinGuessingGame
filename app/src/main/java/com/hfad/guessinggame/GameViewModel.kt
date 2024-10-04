@@ -92,4 +92,9 @@ class GameViewModel : ViewModel() {
 
         return message
     }
+
+    // Окончание игры
+    fun finishGame() {
+        _gameOver.value = true
+    }
 }
