@@ -14,15 +14,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
-import com.hfad.guessinggame.databinding.FragmentResultBinding
 
 class ResultFragment : Fragment() {
-    private var _binding: FragmentResultBinding? = null
-    private val binding get() = _binding!!
     lateinit var viewModel: ResultViewModel
     lateinit var viewModelFactory: ResultViewModelFactory
 
@@ -31,29 +29,17 @@ class ResultFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentResultBinding.inflate(inflater, container, false).apply {
-            composeView.setContent {
-                MaterialTheme {
-                    Surface {
-                        view?.let { ResultFragmentContent(it, viewModel) }
-                    }
-                }
-            }
-        }
-
-        val view = binding.root
-
         val result = ResultFragmentArgs.fromBundle(requireArguments()).result
         viewModelFactory = ResultViewModelFactory(result)
         viewModel = ViewModelProvider(this, viewModelFactory).get(ResultViewModel::class.java)
-        binding.resultViewModel = viewModel
 
-        // По щелчку на кнопке происходит переход к GameFragment.
-        binding.newGameButton.setOnClickListener {
-            view.findNavController().navigate(R.id.action_resultFragment_to_gameFragment)
+        return ComposeView(requireContext()).apply {
+            setContent { MaterialTheme {
+                Surface {
+                    view?.let { ResultFragmentContent(it, viewModel) }
+                }
+            } }
         }
-
-        return view
     }
 }
 
