@@ -20,17 +20,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
-import com.hfad.guessinggame.databinding.FragmentGameBinding
 import androidx.lifecycle.ViewModelProvider
 
 class GameFragment : Fragment() {
-    private var _binding: FragmentGameBinding? = null
-    private val binding get() = _binding!!
     lateinit var viewModel: GameViewModel
 
     override fun onCreateView(
@@ -38,9 +36,19 @@ class GameFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentGameBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
-        binding.composeView.setContent {
+        viewModel.gameOver.observe(viewLifecycleOwner, Observer {
+                newValue ->
+            if (newValue) {
+                val action = GameFragmentDirections.actionGameFragmentToResultFragment(viewModel.wonLostMessage())
+                view?.findNavController()?.navigate(action)
+            }
+        })
+
+        val composeView = ComposeView(requireContext())
+
+        composeView.setContent {
             MaterialTheme {
                 Surface {
                     GameFragmentContent(viewModel)
@@ -48,31 +56,7 @@ class GameFragment : Fragment() {
             }
         }
 
-        val view = binding.root
-        viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
-
-        binding.gameViewModel = viewModel
-        binding.lifecycleOwner = viewLifecycleOwner
-
-        viewModel.gameOver.observe(viewLifecycleOwner, Observer {
-            newValue ->
-                if (newValue) {
-                    val action = GameFragmentDirections.actionGameFragmentToResultFragment(viewModel.wonLostMessage())
-                    view.findNavController().navigate(action)
-                }
-        })
-
-        binding.guessButton.setOnClickListener() {
-            viewModel.makeGuess(binding.guess.text.toString().uppercase())
-            binding.guess.text = null
-        }
-
-        return view
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        return composeView
     }
 }
 
